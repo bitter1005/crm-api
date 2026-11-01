@@ -1,5 +1,6 @@
 from django.contrib import admin
-from .models import Deal, Task, Comment
+
+from .models import Comment, Deal, Task
 
 
 @admin.register(Deal)

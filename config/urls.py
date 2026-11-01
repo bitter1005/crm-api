@@ -21,12 +21,13 @@ from rest_framework.routers import DefaultRouter
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 
 from apps.clients.views import ClientViewSet
-from apps.deals.views import DealViewSet
-
+from apps.deals.views import CommentViewSet, DealViewSet, TaskViewSet
 
 router = DefaultRouter()
 router.register("clients", ClientViewSet, basename="client")
-router.register("deals",DealViewSet,basename="deal")
+router.register("deals", DealViewSet, basename="deal")
+router.register("tasks", TaskViewSet, basename="task")
+router.register("comments", CommentViewSet, basename="comment")
 
 
 urlpatterns = [
