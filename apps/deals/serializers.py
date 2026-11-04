@@ -1,5 +1,7 @@
 from rest_framework import serializers
 
+from apps.users.permissions import is_admin
+
 from .models import Comment, Deal, Task
 
 
@@ -16,7 +18,15 @@ class DealSerializer(serializers.ModelSerializer):
             "created_at",
             "updated_at",
         ]
-        read_only_fields = ["owner","created_at", "updated_at"]
+        read_only_fields = ["owner", "created_at", "updated_at"]
+
+    def validate_client(self, client):
+        user = self.context["request"].user
+        if not is_admin(user) and client.owner != user:
+            raise serializers.ValidationError(
+                "Нельзя создать сделку для чужого клиента."
+            )
+        return client
 
 
 class TaskSerializer(serializers.ModelSerializer):
