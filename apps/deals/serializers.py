@@ -34,9 +34,21 @@ class TaskSerializer(serializers.ModelSerializer):
         model = Task
         fields = ["id", "deal", "assignee", "title", "due_date", "is_done"]
 
+    def validate_deal(self, deal):
+        user = self.context["request"].user
+        if not is_admin(user) and deal.owner != user:
+            raise serializers.ValidationError("Это чужая сделка.")
+        return deal
+
 
 class CommentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Comment
         fields = ["id", "deal", "author", "text", "created_at"]
-        read_only_fields = ["created_at"]
+        read_only_fields = ["author", "created_at"]
+
+    def validate_deal(self, deal):
+        user = self.context["request"].user
+        if not is_admin(user) and deal.owner != user:
+            raise serializers.ValidationError("Это чужая сделка")
+        return deal
