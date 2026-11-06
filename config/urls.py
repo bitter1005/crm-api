@@ -21,6 +21,7 @@ from rest_framework.routers import DefaultRouter
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 
 from apps.clients.views import ClientViewSet
+from apps.deals.analytics import FunnelView, ManagerRevenueView
 from apps.deals.views import CommentViewSet, DealViewSet, TaskViewSet
 
 router = DefaultRouter()
@@ -33,6 +34,8 @@ router.register("comments", CommentViewSet, basename="comment")
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("api/", include(router.urls)),
+    path("api/analytics/funnel/", FunnelView.as_view()),
+    path("api/analytics/managers/", ManagerRevenueView.as_view()),
     path("api/auth/token/", TokenObtainPairView.as_view()),
     path("api/auth/token/refresh/", TokenRefreshView.as_view()),
 ]

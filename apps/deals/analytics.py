@@ -1,0 +1,54 @@
+from django.db.models import Count, Sum
+from rest_framework.response import Response
+from rest_framework.views import APIView
+
+from apps.users.permissions import is_admin
+
+from .models import Deal
+
+
+def visible_deals(user):
+    qs = Deal.objects.all()
+    return qs if is_admin(user) else qs.filter(owner=user)
+
+
+class FunnelView(APIView):
+    def get(self, request):
+        rows = (
+            visible_deals(request.user)
+            .values("status")
+            .annotate(count=Count("id"), total=Sum("amount"))
+            .order_by("status")
+        )
+        by_status = {row["status"]: row for row in rows}
+
+        stages = []
+        for status in Deal.Status:
+            row = by_status.get(status.value, {})
+            stages.append(
+                {
+                    "status": status.value,
+                    "label": status.label,
+                    "count": row.get("count", 0),
+                    "total": row.get("total") or 0,
+                }
+            )
+
+        all_count = sum(s["count"] for s in stages)
+        won_count = by_status.get(Deal.Status.WON, {}).get("count", 0)
+        conversion = round(won_count / all_count * 100, 1) if all_count else 0
+
+        return Response({"stages": stages, "conversion_percent": conversion})
+
+
+class ManagerRevenueView(APIView):
+    def get(self, request):
+        rows = (
+            visible_deals(request.user)
+            .filter(status=Deal.Status.WON)
+            .values("owner", "owner__username")
+            .annotate(deals=Count("id"), revenue=Sum("amount"))
+            .order_by("-revenue")
+        )
+
+        return Response(list(rows))
