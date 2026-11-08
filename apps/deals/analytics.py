@@ -2,14 +2,8 @@ from django.db.models import Count, Sum
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from apps.users.permissions import is_admin
-
 from .models import Deal
-
-
-def visible_deals(user):
-    qs = Deal.objects.all()
-    return qs if is_admin(user) else qs.filter(owner=user)
+from .selectors import visible_deals
 
 
 class FunnelView(APIView):

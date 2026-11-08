@@ -1,9 +1,7 @@
-from django.db.models import Q
 from rest_framework import viewsets
 
-from apps.users.permissions import is_admin
-
 from .models import Comment, Deal, Task
+from .selectors import visible_comments, visible_deals, visible_tasks
 from .serializers import CommentSerializer, DealSerializer, TaskSerializer
 
 
@@ -14,11 +12,7 @@ class DealViewSet(viewsets.ModelViewSet):
     filterset_fields = ["status", "owner", "client"]
 
     def get_queryset(self):
-        qs = super().get_queryset()
-        user = self.request.user
-        if is_admin(user):
-            return qs
-        return qs.filter(owner=user)
+        return visible_deals(self.request.user).select_related("client", "owner")
 
     def perform_create(self, serializer):
         serializer.save(owner=self.request.user)
@@ -31,11 +25,7 @@ class TaskViewSet(viewsets.ModelViewSet):
     filterset_fields = ["assignee", "is_done", "deal"]
 
     def get_queryset(self):
-        qs = super().get_queryset()
-        user = self.request.user
-        if is_admin(user):
-            return qs
-        return qs.filter(Q(assignee=user) | Q(deal__owner=user))
+        return visible_tasks(self.request.user).select_related("deal", "assignee")
 
 
 class CommentViewSet(viewsets.ModelViewSet):
@@ -45,11 +35,7 @@ class CommentViewSet(viewsets.ModelViewSet):
     filterset_fields = ["deal", "author"]
 
     def get_queryset(self):
-        qs = super().get_queryset()
-        user = self.request.user
-        if is_admin(user):
-            return qs
-        return qs.filter(deal__owner=user)
+        return visible_comments(self.request.user).select_related("deal", "author")
 
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
