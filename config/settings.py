@@ -14,6 +14,7 @@ import os
 from datetime import timedelta
 from pathlib import Path
 
+from celery.schedules import crontab
 from dotenv import load_dotenv
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -137,6 +138,22 @@ STATIC_URL = "static/"
 
 SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(hours=1),
+}
+
+
+CELERY_BROKER_URL = os.getenv("CELERY_BROKER_URL", "redis://redis:6379/0")
+
+CELERY_TIMEZONE = TIME_ZONE
+
+CELERY_BEAT_SCHEDULE = {
+    "remind-due-tasks": {
+        "task": "apps.deals.tasks.remind_due_tasks",
+        "schedule": crontab(minute="*/30"),
+    },
+    "daily-deals-report": {
+        "task": "apps.deals.tasks.daily_deals_report",
+        "schedule": crontab(hour=9, minute=0),
+    },
 }
 
 # Email

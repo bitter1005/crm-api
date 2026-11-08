@@ -2,4 +2,10 @@
 .env 
 __pycache__/
 *.pyc
+celerybeat-schedule*
 login.json
+comment.json
+client.json
+deal.json
+patch.json
+refresh.json
