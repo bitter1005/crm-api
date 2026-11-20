@@ -15,6 +15,8 @@ class ClientViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         qs = super().get_queryset()
         user = self.request.user
+        if not user.is_authenticated:
+            return qs.none()
         if is_admin(user):
             return qs
         return qs.filter(owner=user)

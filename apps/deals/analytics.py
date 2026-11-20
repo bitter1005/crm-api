@@ -1,12 +1,47 @@
 from django.db.models import Count, Sum
+from drf_spectacular.utils import extend_schema, inline_serializer
+from rest_framework import serializers
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from .models import Deal
 from .selectors import visible_deals
 
+STAGE = inline_serializer(
+    "FunnelStage",
+    fields={
+        "status": serializers.CharField(),
+        "label": serializers.CharField(),
+        "count": serializers.IntegerField(),
+        "total": serializers.FloatField(),
+    },
+    many=True,
+)
+
+FUNNEL = inline_serializer(
+    "Funnel",
+    fields={"stages": STAGE, "conversion_percent": serializers.FloatField()},
+)
+
+MANAGER_ROW = inline_serializer(
+    "ManagerRevenue",
+    fields={
+        "owner": serializers.IntegerField(),
+        "owner__username": serializers.CharField(),
+        "deals": serializers.IntegerField(),
+        "revenue": serializers.FloatField(),
+    },
+    many=True,
+)
+
 
 class FunnelView(APIView):
+    @extend_schema(
+        tags=["analytics"],
+        summary="Воронка продаж",
+        description="Сделки по статусам и конверсия. Менеджер видит свои, админ все.",
+        responses=FUNNEL,
+    )
     def get(self, request):
         rows = (
             visible_deals(request.user)
@@ -36,6 +71,12 @@ class FunnelView(APIView):
 
 
 class ManagerRevenueView(APIView):
+    @extend_schema(
+        tags=["analytics"],
+        summary="Выручка по менеджерам",
+        description="Только выигранные сделки, по убыванию выручки.",
+        responses=MANAGER_ROW,
+    )
     def get(self, request):
         rows = (
             visible_deals(request.user)

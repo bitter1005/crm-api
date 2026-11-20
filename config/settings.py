@@ -179,3 +179,14 @@ REST_FRAMEWORK = {
     "PAGE_SIZE": 20,
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
 }
+
+SPECTACULAR_SETTINGS = {
+    "TITLE": "CRM API",
+    "DESCRIPTION": (
+        "Учебная CRM: клиенты, сделки, задачи, комментарии, права по ролям "
+        "и аналитика. Вход через JWT: получить токен в /api/auth/token/."
+    ),
+    "VERSION": "1.0.0",
+    "SERVE_INCLUDE_SCHEMA": False,
+    "SWAGGER_UI_SETTINGS": {"persistAuthorization": True},
+}
