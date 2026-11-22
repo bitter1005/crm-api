@@ -1,0 +1,10 @@
+.git
+.github
+.venv
+.env
+__pycache__
+*.pyc
+staticfiles
+celerybeat-schedule*
+docs
+tests
